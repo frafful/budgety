@@ -4,15 +4,30 @@ var UIController = (function(){
         inputType: '.add__type',
         inputDescription: '.add__description',
         inputValue: '.add__value',
-        inputBtn: '.add__btn'
+        inputBtn: '.add__btn',
+        incomeContainer: '.income__list',
+        expenseContainer: '.expense__list'
     }
     
     return {
             getInput: getInput,
-            addItem: addItem,
+            addItemToList: addItemToList,
+            clearFields: clearFields,
+
             getDOMStrings: function(){
                 return DOMStrings;
             }
+        };
+
+        var clearFields = function(){
+            var fields, fieldsArray;
+            document.querySelectorAll(DOMStrings.inputDescription + ',' + DOMStrings.inputValue);
+
+            fieldsArray = Array.prototype.slice.call(fields);
+            fieldsArray.array.forEach((element, i, array) => {
+                element.value = "";
+            });
+            fieldsArray[0].focus();
         };
 
         var getInput = function(){
@@ -21,37 +36,40 @@ var UIController = (function(){
                 value: document.querySelector(DOMStrings.inputValue).value,
                 description: document.querySelector(DOMStrings.inputDescription).value
             };
-        }
+        };
 
-        var addItem = function(description, value, type){
+        var addItemToList = function(newItem, type){
             
-            if(type == 'inc'){
-                var newElement = "<div class=\"item clearfix\" id=\"income-" + (budget.getIncomes().length - 1) + "\">"
-                                 +  "<div class=\"item__description\">" + addedItem.description + "</div>"
+            var newElement, parentElement;
+
+            if(type == 'inc') {
+                newElement = "<div class=\"item clearfix\" id=\"income-" + (budget.getIncomes().length - 1) + "\">"
+                                 +  "<div class=\"item__description\">" + newItem.description + "</div>"
                                  +  "<div class=\"right clearfix\">"
-                                 +      "<div class=\"item__value\">+ " + addedItem.value.toFixed(2) + "</div>"
+                                 +      "<div class=\"item__value\">+ " + newItem.value.toFixed(2) + "</div>"
                                  +       "<div class=\"item__delete\">"
                                  +          "<button class=\"item__delete--btn\" onclick=\"removeItem(this, 'inc');\"><i class=\"ion-ios-close-outline\"></i></button>"
                                  +      "</div>"
                                  +  "</div>"
                                  +  "</div>";
     
-                document.querySelector('.income__list').innerHTML += newElement;
+                element = document.querySelector(DOMStrings.incomeContainer);
             } 
-            else{
-                var newElement = "<div class=\"item clearfix\" id=\"expense-" + (budget.getExpenses().length - 1) + "\">"
-                                +  "<div class=\"item__description\">" + addedItem.description + "</div>"
+            else {
+                newElement = "<div class=\"item clearfix\" id=\"expense-" + (budget.getExpenses().length - 1) + "\">"
+                                +  "<div class=\"item__description\">" + newItem.description + "</div>"
                                 +  "<div class=\"right clearfix\">"
-                                +      "<div class=\"item__value\">- " + addedItem.value.toFixed(2) + "</div>"
+                                +      "<div class=\"item__value\">- " + newItem.value.toFixed(2) + "</div>"
                                 +      "<div class=\"item__percentage\">" + budget.getValuePercentageBudget(budget.getExpenses().length - 1) + " %" + "</div>"
                                 +       "<div class=\"item__delete\">"
                                 +          "<button class=\"item__delete--btn\" onclick=\"removeItem(this, 'exp');\"><i class=\"ion-ios-close-outline\"></i></button>"
                                 +      "</div>"
                                 +  "</div>"
                                 +  "</div>";
-    
-                document.querySelector('.expenses__list').innerHTML += newElement;
+                element = document.querySelector(DOMStrings.expenseContainer);
             }
+
+            element.insertAdjacentElement('beforeend', newElement);
         }
     
     })();
@@ -192,8 +210,4 @@ function refreshItemExpensesPercentual(){
 
 function isNumeric(n) {
     return !isNaN(parseFloat(n)) && isFinite(n);
-}
-
-function getCurrentMonthName(index){
-    
 }

@@ -3,15 +3,56 @@ var budgetController = (function(){
     var _expenses = [];
     var _incomes = [];
 
-    var addItem = function(description, value, type){
-        var item = new Item(description, value, type);
+    var data = {
+        allItems: {
+            exp: [],
+            inc: []
+        },
+        totals: {
+            exp: 0,
+            inc: 0
+        }
+    };
+
+    function getNewID(type) {
+        var highestID = 0;
+
+        for(i = 0; data.allItems[type].length; i++) {
+            if(data.allItems[type].ID > highestID)
+                highestID = data.allItems[type].ID;
+        }
+
+        return highestID + 1;
+    }
+
+    var addItems = function(des, val, type){
     
+        var newItem, ID;
+
+        ID = getNewID(type);
+        
         if(type == 'inc')
-            _incomes.push(item);
+            newItem = new Income(ID, description, value);
         else 
-            _expenses.push(item);
+            newItem = new Expense(ID, description, value);
     
-        return item;
+        data.allItems[type].push(newItem);
+
+        return newItem;
+    };
+
+    var Expense = function(id, value, description){
+        
+        this.id = id;
+        this.description = description;
+        this.value = Math.round((parseFloat(value) * 100)) / 100;
+    };
+
+    var Income = function(id, value, description){
+        
+        this.id = id;
+        this.description = description;
+        this.value = Math.round((parseFloat(value) * 100)) / 100;
     };
     
     var removeItem = function(index, type){
@@ -62,13 +103,6 @@ var budgetController = (function(){
         return Math.floor((getTotalExpenses()/getTotalIncome()) * 100);
     };
 
-    var Item = function(description, value, type){
-        
-        this.description = description;
-        this.value = Math.round((parseFloat(value) * 100)) / 100;
-        this.type = type;
-    };
-
     return {
         addItem: function(description, value, type){
             return addItem(description, value, type);
@@ -112,19 +146,32 @@ var controller = (function(budgetCtrl, UICtrl){
     }
     
     var DOM = UICtrl.getDOMStrings();
+
+    var updateBudget = function(){
+
+    }
     
     var ctrlAddItem = function(){
-        
+        var input, newItem;
+
         //Get input values
-        var input = UICtrl.getInput();
+        input = UICtrl.getInput();
 
-        //Add item to budget
-        var newItem = budgetCtrl.addItem(input.description, input.value, input.type);
-        
-        //Add item to UI
-        UICtrl.addItem(newItem.description, newItem.value, newItem.type);
+        //Validate inputs
+        if(isNumeric(input.value) && input.description != "") {
 
-        //Calculate the budget
+            //Add item to budget
+            newItem = budgetCtrl.addItem(newItem, input.type);
+            
+            //Add item to UI
+            UICtrl.addItemToList(input.description, newItem.value, newItem.type);
+            
+            //Clear fields
+            UICtrl.clearFields();
+
+            //Calculate the budget
+            updateBudget();
+        }
 
     }
     
